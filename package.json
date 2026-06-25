@@ -1,0 +1,50 @@
+{
+  "name": "portcull",
+  "version": "1.0.0",
+  "description": "A fast, zero-dependency CLI to list and kill the processes holding your dev ports — never fight EADDRINUSE again.",
+  "type": "module",
+  "bin": {
+    "portcull": "bin/portcull.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node bin/portcull.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "port",
+    "ports",
+    "kill",
+    "kill-port",
+    "lsof",
+    "eaddrinuse",
+    "dev",
+    "devtools",
+    "cli",
+    "productivity",
+    "process"
+  ],
+  "author": "David Chong",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/davidcjw/portcull.git"
+  },
+  "bugs": {
+    "url": "https://github.com/davidcjw/portcull/issues"
+  },
+  "homepage": "https://github.com/davidcjw/portcull#readme",
+  "devDependencies": {
+    "vitest": "^2.1.9"
+  }
+}
