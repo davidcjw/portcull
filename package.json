@@ -36,9 +36,13 @@
   ],
   "author": "David Chong",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/davidcjw/portcull.git"
+    "url": "git+https://github.com/davidcjw/portcull.git"
   },
   "bugs": {
     "url": "https://github.com/davidcjw/portcull/issues"
