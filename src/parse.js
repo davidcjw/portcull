@@ -64,6 +64,31 @@ export function parseLsof(output) {
 }
 
 /**
+ * Parse `lsof -a -p <pids> -d cwd -Fpn` field-mode output into a pid → cwd
+ * map. lsof always precedes per-file fields with an `f` (file descriptor)
+ * marker line even when it isn't requested; it's ignored here.
+ *
+ * @param {string} output
+ * @returns {Map<number, string>}
+ */
+export function parseCwd(output) {
+  const map = new Map();
+  let pid = null;
+  for (const rawLine of String(output).split('\n')) {
+    const line = rawLine.replace(/\r$/, '');
+    if (!line) continue;
+    const tag = line[0];
+    const value = line.slice(1);
+    if (tag === 'p') {
+      pid = Number(value);
+    } else if (tag === 'n' && pid != null && !Number.isNaN(pid)) {
+      map.set(pid, value);
+    }
+  }
+  return map;
+}
+
+/**
  * Parse a `ps` elapsed-time string (`[[dd-]hh:]mm:ss`) into whole seconds.
  *
  * @param {string} etime
@@ -133,6 +158,18 @@ export function humanizeDuration(seconds) {
 }
 
 /**
+ * Truncate a string to maxLen, replacing the last character with an ellipsis
+ * when it overflows.
+ *
+ * @param {string} str
+ * @param {number} maxLen
+ * @returns {string}
+ */
+function clamp(str, maxLen) {
+  return str.length > maxLen ? `${str.slice(0, maxLen - 1).trimEnd()}…` : str;
+}
+
+/**
  * Shorten a full command line for display: replace path tokens with their
  * basename ("/usr/bin/node .../next dev" → "node next dev") and clamp length.
  *
@@ -153,8 +190,7 @@ export function shortenCommand(command, maxLen = 44) {
   // the last "/Contents/MacOS/" up to the first CLI flag.
   const bundleMatch = raw.match(/.*\.app\/Contents\/MacOS\/(.+)$/);
   if (bundleMatch) {
-    const name = bundleMatch[1].split(/\s+-/)[0].trim();
-    return name.length > maxLen ? `${name.slice(0, maxLen - 1).trimEnd()}…` : name;
+    return clamp(bundleMatch[1].split(/\s+-/)[0].trim(), maxLen);
   }
 
   const tokens = raw
@@ -169,7 +205,19 @@ export function shortenCommand(command, maxLen = 44) {
     // Collapse consecutive duplicate tokens (defense in depth for other
     // space-containing paths that aren't macOS app bundles).
     .filter((t, i, arr) => t !== arr[i - 1]);
-  let out = tokens.join(' ');
-  if (out.length > maxLen) out = `${out.slice(0, maxLen - 1).trimEnd()}…`;
-  return out;
+  return clamp(tokens.join(' '), maxLen);
+}
+
+/**
+ * Append a resolved project name to an already-shortened opaque command
+ * ("next-server (v16.2.9)" → "next-server (v16.2.9) · the-chronicle").
+ *
+ * @param {string} command - already through `shortenCommand`
+ * @param {string | null | undefined} projectName
+ * @param {number} [maxLen=44]
+ * @returns {string}
+ */
+export function withProjectName(command, projectName, maxLen = 44) {
+  if (!projectName) return command;
+  return clamp(`${command} · ${projectName}`, maxLen);
 }

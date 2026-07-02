@@ -4,8 +4,10 @@ import {
   parseLsof,
   parseEtime,
   parsePs,
+  parseCwd,
   humanizeDuration,
   shortenCommand,
+  withProjectName,
 } from '../src/parse.js';
 
 describe('parseListenAddress', () => {
@@ -135,5 +137,39 @@ describe('shortenCommand', () => {
   });
   it('handles empty', () => {
     expect(shortenCommand('')).toBe('');
+  });
+});
+
+describe('parseCwd', () => {
+  it('maps pid to cwd, ignoring the fd marker line', () => {
+    const out = ['p111', 'fcwd', 'n/Users/dev/code/foo', 'p222', 'fcwd', 'n/Users/dev/code/bar'].join(
+      '\n',
+    );
+    expect(parseCwd(out)).toEqual(
+      new Map([
+        [111, '/Users/dev/code/foo'],
+        [222, '/Users/dev/code/bar'],
+      ]),
+    );
+  });
+  it('returns an empty map for empty output', () => {
+    expect(parseCwd('')).toEqual(new Map());
+  });
+});
+
+describe('withProjectName', () => {
+  it('appends the project name', () => {
+    expect(withProjectName('next-server (v16.2.9)', 'the-chronicle')).toBe(
+      'next-server (v16.2.9) · the-chronicle',
+    );
+  });
+  it('returns the command unchanged when no project name resolved', () => {
+    expect(withProjectName('node', null)).toBe('node');
+    expect(withProjectName('node', undefined)).toBe('node');
+  });
+  it('clamps the combined string', () => {
+    const out = withProjectName('next-server (v16.2.9)', 'a'.repeat(40), 20);
+    expect(out.length).toBe(20);
+    expect(out.endsWith('…')).toBe(true);
   });
 });

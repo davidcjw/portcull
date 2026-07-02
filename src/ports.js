@@ -48,3 +48,27 @@ export function labelFor(port) {
 export function isDevPort(port) {
   return Object.prototype.hasOwnProperty.call(KNOWN_PORTS, port);
 }
+
+// Runtime commands that carry no project-identifying information on their
+// own (e.g. Next.js explicitly renames its dev worker to "next-server
+// (vX.Y.Z)" regardless of which project spawned it). Worth a cwd lookup so
+// the ports list can show which project they belong to.
+const OPAQUE_COMMANDS = [
+  /^next-server\b/,
+  /^node$/,
+  /^bun$/,
+  /^deno$/,
+  /^python3?(\.\d+)?$/,
+  /^ruby$/,
+  /^java$/,
+];
+
+/**
+ * Whether a shortened command is opaque enough to warrant resolving its
+ * process's cwd for a friendlier project name.
+ * @param {string} command - already through `shortenCommand`
+ * @returns {boolean}
+ */
+export function isOpaqueCommand(command) {
+  return OPAQUE_COMMANDS.some((re) => re.test(command));
+}

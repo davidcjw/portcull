@@ -92,6 +92,15 @@ and signals processes with Node's `process.kill`. Kill defaults to `SIGTERM`
 (graceful); `--force` uses `SIGKILL`. There's no magic and no daemon — every
 action maps to something you could type yourself.
 
+Some runtimes report a command line with no project-identifying info at all
+(Next.js renames its dev worker to the generic `next-server (vX.Y.Z)`
+regardless of which project spawned it). For a small allowlist of these
+opaque commands, `portcull` resolves the owning project by looking up the
+process's working directory (one extra batched `lsof -d cwd` call, not one
+per port) and reading `name` from its `package.json`, falling back to the
+directory name — e.g. `next-server (v16.2.9) · agent-hq`. If the lookup
+fails for any reason, the generic command is shown unchanged.
+
 ## Library use
 
 The internals are exported for programmatic use:
