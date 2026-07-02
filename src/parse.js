@@ -142,8 +142,22 @@ export function humanizeDuration(seconds) {
  */
 export function shortenCommand(command, maxLen = 44) {
   if (!command) return '';
-  const tokens = String(command)
-    .trim()
+  const raw = String(command).trim();
+
+  // macOS app bundle paths (".../The Chronicle.app/Contents/MacOS/The
+  // Chronicle Helper --type=renderer") embed a binary name that itself
+  // contains spaces. Splitting on whitespace first (below) shreds that name
+  // into several bogus path-like tokens that only consecutive-dedupe back
+  // into garbage such as "The Chronicle The Chronicle Helper". Pull the
+  // binary name directly out of the bundle path instead: everything after
+  // the last "/Contents/MacOS/" up to the first CLI flag.
+  const bundleMatch = raw.match(/.*\.app\/Contents\/MacOS\/(.+)$/);
+  if (bundleMatch) {
+    const name = bundleMatch[1].split(/\s+-/)[0].trim();
+    return name.length > maxLen ? `${name.slice(0, maxLen - 1).trimEnd()}…` : name;
+  }
+
+  const tokens = raw
     .split(/\s+/)
     .map((t) => {
       if (t.includes('/')) {
@@ -152,10 +166,8 @@ export function shortenCommand(command, maxLen = 44) {
       }
       return t;
     })
-    // Collapse consecutive duplicate tokens. macOS app paths contain spaces
-    // (".../The Chronicle.app/.../The Chronicle Helper") which, once flattened
-    // by `ps` and split on whitespace, basename to repeats like
-    // "The The Chronicle Helper". Display-only de-noising.
+    // Collapse consecutive duplicate tokens (defense in depth for other
+    // space-containing paths that aren't macOS app bundles).
     .filter((t, i, arr) => t !== arr[i - 1]);
   let out = tokens.join(' ');
   if (out.length > maxLen) out = `${out.slice(0, maxLen - 1).trimEnd()}…`;

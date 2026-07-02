@@ -113,11 +113,20 @@ describe('shortenCommand', () => {
       'node next dev',
     );
   });
-  it('collapses consecutive duplicate tokens (macOS app paths with spaces)', () => {
-    expect(shortenCommand('/Apps/The Chronicle.app/x/The Chronicle Helper')).toBe(
+  it('collapses consecutive duplicate tokens (non-bundle paths with spaces)', () => {
+    expect(shortenCommand('mysqld mysql mysql plugin')).toBe('mysqld mysql plugin');
+  });
+  it('extracts the binary name from a macOS app bundle path with spaces', () => {
+    expect(shortenCommand('/Apps/The Chronicle.app/Contents/MacOS/The Chronicle Helper')).toBe(
       'The Chronicle Helper',
     );
-    expect(shortenCommand('mysqld mysql mysql plugin')).toBe('mysqld mysql plugin');
+  });
+  it('extracts the binary name from a nested helper bundle with trailing CLI flags', () => {
+    expect(
+      shortenCommand(
+        '/Applications/The Chronicle.app/Contents/Frameworks/The Chronicle Helper.app/Contents/MacOS/The Chronicle Helper --type=renderer --service-name=com.example.chronicle',
+      ),
+    ).toBe('The Chronicle Helper');
   });
   it('clamps long output with an ellipsis', () => {
     const out = shortenCommand('a'.repeat(100), 10);
