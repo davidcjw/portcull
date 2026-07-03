@@ -1,7 +1,8 @@
 # portcull
 
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+[![npm version](https://img.shields.io/npm/v/portcull.svg)](https://www.npmjs.com/package/portcull)
 [![CI](https://github.com/davidcjw/portcull/actions/workflows/ci.yml/badge.svg)](https://github.com/davidcjw/portcull/actions/workflows/ci.yml)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)
 ![Dependencies](https://img.shields.io/badge/dependencies-0-blue.svg)
 
@@ -11,10 +12,10 @@
 See what's listening, what it is, and how long it's been running — then free the port with one command.
 
 <p align="center">
-  <img src="docs/demo.gif" alt="portcull demo — listing and killing dev ports" width="640">
+  <img src="docs/demo.gif" alt="portcull demo — listing dev ports, then a dry-run kill" width="720">
 </p>
 
-> **Demo placeholder.** Record a short clip (e.g. with [vhs](https://github.com/charmbracelet/vhs)) of `portcull ls` then `portcull kill 3000` and drop it at `docs/demo.gif`.
+<sub>Demo recorded with [vhs](https://github.com/charmbracelet/vhs) — regenerate with `vhs docs/demo.tape`.</sub>
 
 ## Contents
 
